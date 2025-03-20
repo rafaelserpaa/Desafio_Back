@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+asyncio
+starlette
+websockets
+jinja2

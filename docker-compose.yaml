@@ -3,10 +3,13 @@ services:
     build: .
     ports:
       - "8000:8000"
+    volumes:
+      - ".:/app" # Basicamente toda vez que algo na minha pasta raiz mudar refletirá na pasta /app do container
     depends_on:
       - db
 
   db:
     build: ./db
+    container_name: db
     ports:
       - "5432:5432"

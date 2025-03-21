@@ -4,6 +4,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
 from functools import lru_cache
+import psycopg2
 
 app = FastAPI()
 
@@ -56,7 +57,21 @@ async def get(request: Request):
 
 @app.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
+    conn = psycopg2.connect(
+        host="db",
+        database="db",
+        user="postgres",
+        password="postgres"
+    )
+    cur = conn.cursor()
+
     await manager.connect(websocket)
+
+    # Insere clientId no banco
+    cur.execute("INSERT INTO connected_users (clientId) VALUES (%s)", (client_id,))
+    conn.commit()
+    print(f"Client #{client_id} has connected.")
+
     try: 
         while True:
             data = await websocket.receive_text()
@@ -69,3 +84,11 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         await manager.broadcast(f"Client #{client_id} has left the chat")
+        
+        # Remove clientId do banco
+        cur.execute("DELETE FROM connected_users WHERE clientId = %s", (str(client_id),))
+        conn.commit()
+        print(f"Client #{client_id} has disconnected.")
+    finally:
+        cur.close()
+        conn.close()

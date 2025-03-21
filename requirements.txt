@@ -4,3 +4,4 @@ asyncio
 starlette
 websockets
 jinja2
+psycopg2

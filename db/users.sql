@@ -1,4 +1,4 @@
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS connected_users (
   id SERIAL PRIMARY KEY,
-  clientId VARCHAR(255) NOT NULL
+  clientId TEXT NOT NULL
 );
